@@ -28,12 +28,23 @@ class PlayState extends FlxState
 		this.tilemap.setDownwardsGlue(true, 0.1);
 		add(this.tilemap);
 
+		FlxG.camera.minScrollX = 0;
+		FlxG.camera.maxScrollX = this.tilemap.width;
+		FlxG.camera.minScrollY = 0;
+		FlxG.camera.maxScrollY = this.tilemap.height;
+		FlxG.camera.follow(player, PLATFORMER, 1);
+
 		super.create();
 	}
 
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		if (FlxG.keys.justPressed.R)
+		{
+			FlxG.switchState(new PlayState());
+		}
 
 		FlxG.collide(player, tilemap);
 	}

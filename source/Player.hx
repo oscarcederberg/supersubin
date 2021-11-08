@@ -17,7 +17,7 @@ class Player extends FlxSprite
 	private var parent:PlayState;
 
 	var jumpTimer:FlxTimer;
-	var jumpTime = 0.25;
+	var jumpTime = 0.225;
 	var canVariableJump:Bool;
 	var jumping:Bool;
 
@@ -98,6 +98,13 @@ class Player extends FlxSprite
 		else if (!jumping)
 		{
 			canVariableJump = false;
+		}
+		else
+		{
+			if (!_jump)
+			{
+				canVariableJump = false;
+			}
 		}
 
 		if (canVariableJump && _jump)

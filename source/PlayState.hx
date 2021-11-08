@@ -1,12 +1,12 @@
 package;
 
-import flixel.FlxSprite;
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.addons.display.FlxBackdrop;
 import flixel.addons.editors.ogmo.FlxOgmo3Loader;
 import flixel.group.FlxGroup;
 import flixel.tile.FlxTilemap;
-import flixel.addons.display.FlxBackdrop;
 
 class PlayState extends FlxState
 {
@@ -26,9 +26,9 @@ class PlayState extends FlxState
 		var bg_00 = new FlxBackdrop("assets/images/park_bg_00.png", 0.2, 0.0, true, false);
 		var bg_01 = new FlxBackdrop("assets/images/park_bg_01.png", 0.5, 0.0, true, false);
 		var bg_02 = new FlxBackdrop("assets/images/park_bg_02.png", 0.8, 0.0, true, false);
-		add(bg_00);	
-		add(bg_01);	
-		add(bg_02);	
+		add(bg_00);
+		add(bg_01);
+		add(bg_02);
 
 		this.map = new FlxOgmo3Loader("assets/data/project.ogmo", "assets/data/level_test.json");
 		this.map.loadEntities(placeEntities, "entities");

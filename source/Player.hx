@@ -3,17 +3,22 @@ package;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.util.FlxTimer;
 
 class Player extends FlxSprite
 {
 	static inline final WIDTH:Int = 4;
 	static inline final HEIGHT:Int = 16;
-	static inline final MOVE_SPEED:Float = PlayState.CELL_SIZE * 4;
-	static inline final JUMP_SPEED:Float = PlayState.CELL_SIZE * 16;
-	static inline final GRAVITY:Float = PlayState.CELL_SIZE * 30;
+	static inline final MOVE_SPEED:Float = 80;
+	static inline final JUMP_SPEED:Float = 180;
+	static inline final JUMP_MAX:Float = 260;
+	static inline final GRAVITY:Float = 1080;
 
-	var parent:PlayState;
+	private var parent:PlayState;
 
+	var jumpTimer:FlxTimer;
+	var jumpTime = 0.25;
+	var canVariableJump:Bool;
 	var jumping:Bool;
 
 	public function new(x:Float, y:Float)
@@ -22,11 +27,13 @@ class Player extends FlxSprite
 		this.parent = cast(FlxG.state);
 
 		this.facing = FlxObject.RIGHT;
-		this.jumping = false;
-		drag.x = MOVE_SPEED * 8;
+
+		jumpTimer = new FlxTimer();
+		canVariableJump = false;
+		jumping = false;
+
 		acceleration.y = GRAVITY;
-		maxVelocity.x = MOVE_SPEED;
-		maxVelocity.y = JUMP_SPEED;
+		maxVelocity.y = JUMP_MAX;
 
 		loadGraphic("assets/images/subin.png", true, PlayState.CELL_SIZE, PlayState.CELL_SIZE);
 		setSize(WIDTH, HEIGHT);
@@ -35,7 +42,7 @@ class Player extends FlxSprite
 		setFacingFlip(FlxObject.RIGHT, false, false);
 		animation.add("idle", [0]);
 		animation.add("jump", [2]);
-		animation.add("walk", [1, 0], 4, true);
+		animation.add("walk", [1, 0], 6, true);
 		animation.play("idle");
 	}
 
@@ -55,7 +62,7 @@ class Player extends FlxSprite
 		var _right:Bool = FlxG.keys.pressed.RIGHT;
 
 		var _action:Bool = FlxG.keys.pressed.Z;
-		var _jump:Bool = FlxG.keys.justPressed.X;
+		var _jump:Bool = FlxG.keys.pressed.X;
 
 		velocity.x = 0;
 		if (_up && _down)
@@ -66,33 +73,46 @@ class Player extends FlxSprite
 		if (_left)
 		{
 			facing = FlxObject.LEFT;
-		}
-		else if (_right)
-		{
-			facing = FlxObject.RIGHT;
-		}
-
-		if (_left)
-		{
 			velocity.x = -MOVE_SPEED;
 		}
 		else if (_right)
 		{
+			facing = FlxObject.RIGHT;
 			velocity.x = MOVE_SPEED;
+		}
+		else
+		{
+			velocity.x = 0;
 		}
 
 		if (this.isTouching(FlxObject.FLOOR))
 		{
-			if (_jump && !_action && !jumping)
+			jumping = false;
+			canVariableJump = true;
+			if (_jump)
 			{
 				jumping = true;
-				velocity.y = -maxVelocity.y;
-			}
-			else
-			{
-				jumping = false;
+				velocity.y = -JUMP_SPEED;
 			}
 		}
+		else if (!jumping)
+		{
+			canVariableJump = false;
+		}
+
+		if (canVariableJump && _jump)
+		{
+			if (!jumpTimer.active)
+			{
+				jumpTimer.start(jumpTime, onVariableJumpEnds, 1);
+			}
+			velocity.y = -JUMP_SPEED;
+		}
+	}
+
+	private function onVariableJumpEnds(timer:FlxTimer)
+	{
+		canVariableJump = false;
 	}
 
 	function animate()

@@ -1,8 +1,8 @@
 package enemies;
 
+import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxTimer;
 import flixel.FlxG;
-import flixel.FlxObject;
 
 enum State {
     Idling;
@@ -31,7 +31,7 @@ class CrabEnemy extends Enemy{
         this.parent = cast(FlxG.state);
 
         this.currentState = State.Idling;
-        this.facing = FlxObject.LEFT;
+        this.facing = FlxDirectionFlags.LEFT;
         
         stateTimer = new FlxTimer();
         var timeDelay:Float = parent.random.float(0.0,0.5);
@@ -42,12 +42,14 @@ class CrabEnemy extends Enemy{
 
     override function update(elapsed:Float) {
         if(currentState == Moving){
-            if(this.facing == FlxObject.LEFT && isTouching(FlxObject.LEFT)){
+            if(this.facing == FlxDirectionFlags.LEFT
+                    && isTouching(FlxDirectionFlags.LEFT)){
                 currentState = Turning;
                 velocity.x = 0;
                 stateTimer.start(timeTurning, handleState, 1);
                 
-            } else if (this.facing == FlxObject.RIGHT && isTouching(FlxObject.RIGHT)) {
+            } else if (this.facing == FlxDirectionFlags.RIGHT
+                    && isTouching(FlxDirectionFlags.RIGHT)) {
                 currentState = Turning;
                 velocity.x = 0;
                 stateTimer.start(timeTurning, handleState, 1);
@@ -70,7 +72,7 @@ class CrabEnemy extends Enemy{
     
     private function handleState_idle(){
         this.currentState = Moving;
-        velocity.x = this.facing == FlxObject.LEFT ? -MOVE_SPEED : MOVE_SPEED;
+        velocity.x = this.facing == FlxDirectionFlags.LEFT ? -MOVE_SPEED : MOVE_SPEED;
         stateTimer.start(timeMoving, handleState, 1);
     }
     
@@ -82,8 +84,8 @@ class CrabEnemy extends Enemy{
     
     private function handleState_turning(){
         this.currentState = Moving;
-        this.facing = this.facing == FlxObject.LEFT ? FlxObject.RIGHT : FlxObject.LEFT;
-        velocity.x = this.facing == FlxObject.LEFT ? -MOVE_SPEED : MOVE_SPEED;
+        this.facing = this.facing == FlxDirectionFlags.LEFT ? FlxDirectionFlags.RIGHT : FlxDirectionFlags.LEFT;
+        velocity.x = this.facing == FlxDirectionFlags.LEFT ? -MOVE_SPEED : MOVE_SPEED;
         stateTimer.start(timeMoving, handleState, 1);
     }
 }

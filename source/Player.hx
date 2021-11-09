@@ -1,7 +1,8 @@
 package;
 
+import flixel.util.FlxDirectionFlags;
+import flixel.util.FlxSpriteUtil;
 import flixel.FlxG;
-import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.util.FlxTimer;
 
@@ -32,7 +33,7 @@ class Player extends FlxSprite{
 		this.parent = cast(FlxG.state);
 
 		this.currentState = Idling;
-		this.facing = FlxObject.RIGHT;
+		this.facing = FlxDirectionFlags.RIGHT;
 
 		jumpTimer = new FlxTimer();
 		canVariableJump = false;
@@ -43,8 +44,8 @@ class Player extends FlxSprite{
 		loadGraphic("assets/images/subin.png", true, PlayState.CELL_SIZE, PlayState.CELL_SIZE);
 		setSize(WIDTH, HEIGHT);
 		centerOffsets();
-		setFacingFlip(FlxObject.LEFT, true, false);
-		setFacingFlip(FlxObject.RIGHT, false, false);
+		setFacingFlip(FlxDirectionFlags.LEFT, true, false);
+		setFacingFlip(FlxDirectionFlags.RIGHT, false, false);
 		animation.add("idle", [0]);
 		animation.add("jump", [2]);
 		animation.add("walk", [1, 0], 6, true);
@@ -52,6 +53,9 @@ class Player extends FlxSprite{
 	}
 
 	override public function update(elapsed:Float):Void{
+		if(FlxG.collide(this, parent.enemies)){
+			FlxSpriteUtil.flicker(this, 1.5, 0.04, true, false);
+		}
 		movement();
 		animate();
 
@@ -91,11 +95,11 @@ class Player extends FlxSprite{
 		}
 
 		if (_left){
-			facing = FlxObject.LEFT;
+			facing = FlxDirectionFlags.LEFT;
 			velocity.x = -MOVE_SPEED;
 		}
 		else if (_right){
-			facing = FlxObject.RIGHT;
+			facing = FlxDirectionFlags.RIGHT;
 			velocity.x = MOVE_SPEED;
 		}
 		else{
@@ -104,7 +108,7 @@ class Player extends FlxSprite{
 	}
 
 	private function movement_jump(jumpPressed:Bool){
-		if (this.isTouching(FlxObject.FLOOR)){
+		if (this.isTouching(FlxDirectionFlags.FLOOR)){
 			currentState = Idling;
 			canVariableJump = true;
 			if (jumpPressed){
@@ -112,7 +116,7 @@ class Player extends FlxSprite{
 				velocity.y = -JUMP_SPEED;
 			}
 		} else{
-			if (!jumpPressed || isTouching(FlxObject.CEILING)){
+			if (!jumpPressed || isTouching(FlxDirectionFlags.CEILING)){
 				canVariableJump = false;
 			}
 		}

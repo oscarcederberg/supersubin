@@ -4,8 +4,8 @@ import flixel.util.FlxTimer;
 import flixel.FlxG;
 import flixel.FlxObject;
 
-enum State{
-    Idle;
+enum State {
+    Idling;
     Moving;
     Turning;
 }
@@ -30,7 +30,7 @@ class CrabEnemy extends Enemy{
 		
         this.parent = cast(FlxG.state);
 
-        this.currentState = State.Idle;
+        this.currentState = State.Idling;
         this.facing = FlxObject.LEFT;
         
         stateTimer = new FlxTimer();
@@ -59,7 +59,7 @@ class CrabEnemy extends Enemy{
 
     function handleState(timer:FlxTimer){
         switch (currentState){
-            case Idle:
+            case Idling:
                 handleState_idle();
             case Moving:
                 handleState_moving();
@@ -75,7 +75,7 @@ class CrabEnemy extends Enemy{
     }
     
     private function handleState_moving(){
-        this.currentState = Idle;
+        this.currentState = Idling;
         velocity.x = 0;
         stateTimer.start(timeIdle, handleState, 1);
     }

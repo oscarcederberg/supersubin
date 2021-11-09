@@ -6,7 +6,7 @@ import flixel.FlxSprite;
 import flixel.util.FlxTimer;
 
 enum State{
-	Idle;
+	Idling;
 	Moving;
 	Jumping;
 }
@@ -31,7 +31,7 @@ class Player extends FlxSprite{
 		super(x, y);
 		this.parent = cast(FlxG.state);
 
-		this.currentState = Idle;
+		this.currentState = Idling;
 		this.facing = FlxObject.RIGHT;
 
 		jumpTimer = new FlxTimer();
@@ -74,7 +74,7 @@ class Player extends FlxSprite{
 		switch (currentState){
 			case Jumping:
 				movement_jump(_jump);
-			case Idle:
+			case Idling:
 				if (_jump){
 					currentState = Jumping;
 					movement_jump(true);
@@ -86,7 +86,7 @@ class Player extends FlxSprite{
 					currentState = Jumping;
 					movement_jump(true);
 				} else if (!_left && !_right){
-					currentState = Idle;
+					currentState = Idling;
 				}
 		}
 
@@ -105,7 +105,7 @@ class Player extends FlxSprite{
 
 	private function movement_jump(jumpPressed:Bool){
 		if (this.isTouching(FlxObject.FLOOR)){
-			currentState = Idle;
+			currentState = Idling;
 			canVariableJump = true;
 			if (jumpPressed){
 				currentState = Jumping;
@@ -131,7 +131,7 @@ class Player extends FlxSprite{
 
 	function animate(){
 		switch (currentState){
-			case Idle:
+			case Idling:
 				animation.play("idle");
 			case Moving:
 				animation.play("walk");

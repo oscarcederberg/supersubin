@@ -18,6 +18,7 @@ class PlayState extends FlxState{
 	var map:FlxOgmo3Loader;
 
 	public var tilemap:FlxTilemap;
+	public var blocks:FlxTypedSpriteGroup<BreakableBlock>;
 	public var player:Player;
 	public var enemies:FlxSpriteGroup;
 	public var random:FlxRandom;
@@ -34,13 +35,16 @@ class PlayState extends FlxState{
 		var bg_02 = new FlxBackdrop("assets/images/park_bg_02.png", 0.8, 0.0, true, false);
 		add(bg_02);
 
-		this.enemies = new FlxSpriteGroup();
 		this.map = new FlxOgmo3Loader("assets/data/project.ogmo", "assets/data/level_test.json");
 		this.tilemap = map.loadTilemap("assets/images/OGMO/tilemap.png", "tiles");
-		add(enemies);
+		this.blocks = new FlxTypedSpriteGroup();
+		this.enemies = new FlxSpriteGroup();
 		add(this.tilemap);
-		this.map.loadEntities(placeEntities, "entities");
+		add(this.blocks);
+		add(this.enemies);
 
+		this.map.loadEntities(placeEntities, "entities");
+		
 		FlxG.worldBounds.set();
 
 		FlxG.camera.minScrollX = 0;
@@ -59,6 +63,8 @@ class PlayState extends FlxState{
 
 		FlxG.collide(player, tilemap);
 		FlxG.collide(enemies, tilemap);
+		FlxG.collide(player, blocks);
+		FlxG.collide(enemies, blocks);
 	}
 
 	function placeEntities(entity:EntityData){

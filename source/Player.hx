@@ -1,5 +1,10 @@
 package;
 
+import haxe.Log;
+import flixel.math.FlxAngle;
+import flixel.math.FlxVelocity;
+import flixel.math.FlxVector;
+import enemies.Enemy;
 import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxSpriteUtil;
 import flixel.FlxG;
@@ -19,6 +24,8 @@ class Player extends FlxSprite{
 	static inline final JUMP_SPEED:Float = 180;
 	static inline final JUMP_MAX:Float = 260;
 	static inline final GRAVITY:Float = 1080;
+	static inline final BOUNCE_FORCE:Float = 10000;
+	static inline final DAMAGE_FORCE:Float = 15000;
 
 	private var parent:PlayState;
 
@@ -27,6 +34,11 @@ class Player extends FlxSprite{
 	var jumpTimer:FlxTimer;
 	var timeJump = 0.225;
 	var canVariableJump:Bool;
+
+	var bounceTimer:FlxTimer;
+	var bounceDelay = 0.025;
+	var damageDelay = 0.05;
+	var bounceVector:FlxVector;
 
 	public function new(x:Float, y:Float){
 		super(x, y);
@@ -37,6 +49,9 @@ class Player extends FlxSprite{
 
 		jumpTimer = new FlxTimer();
 		canVariableJump = false;
+
+		bounceTimer = new FlxTimer();
+		bounceVector = new FlxVector(0,0);
 
 		acceleration.y = GRAVITY;
 		maxVelocity.y = JUMP_MAX;
@@ -53,13 +68,41 @@ class Player extends FlxSprite{
 	}
 
 	override public function update(elapsed:Float):Void{
-		if(FlxG.collide(this, parent.enemies)){
-			FlxSpriteUtil.flicker(this, 1.5, 0.04, true, false);
-		}
 		movement();
 		animate();
 
+		FlxG.overlap(this, parent.enemies, onEnemyOverlap);
+		acceleration.x = bounceVector.x;
+		acceleration.y = GRAVITY + bounceVector.y;
+
 		super.update(elapsed);
+	}
+
+	function onEnemyOverlap(player:Player, enemy:Enemy):Void{
+		var angle = FlxAngle.angleBetweenPoint(enemy, player.getMidpoint(), false);
+	
+		var tookDamage = false;
+		if(angle == Math.PI || angle < -5/6*Math.PI){
+			tookDamage = true;
+			angle = -3/4*Math.PI;
+		} else if(angle == 0 || angle > -1/6*Math.PI){
+			tookDamage = true;
+			angle = -1/4*Math.PI;
+		}
+		
+		if(!FlxSpriteUtil.isFlickering(player)){
+			if(tookDamage){
+				bounceVector.setPolarRadians(DAMAGE_FORCE, angle);
+				bounceTimer.start(bounceDelay, (_) -> bounceVector.y = 0);
+				currentState = Jumping;
+				FlxSpriteUtil.flicker(player, 1.5, 0.04, true, false);
+			} else{
+				bounceVector.setPolarRadians(BOUNCE_FORCE, angle);
+				bounceTimer.start(bounceDelay, (_) -> bounceVector.y = 0);
+				currentState = Jumping;
+				canVariableJump = true;
+			}
+		}
 	}
 
 	function movement():Void{
@@ -74,6 +117,8 @@ class Player extends FlxSprite{
 
 		var _action:Bool = FlxG.keys.pressed.Z;
 		var _jump:Bool = FlxG.keys.pressed.X;
+
+		var _canMove = true;
 
 		switch (currentState){
 			case Jumping:
@@ -94,13 +139,15 @@ class Player extends FlxSprite{
 				}
 		}
 
-		if (_left){
+		if (_left && _canMove){
 			facing = FlxDirectionFlags.LEFT;
 			velocity.x = -MOVE_SPEED;
+			bounceVector.x = 0;
 		}
 		else if (_right){
 			facing = FlxDirectionFlags.RIGHT;
 			velocity.x = MOVE_SPEED;
+			bounceVector.x = 0;
 		}
 		else{
 			velocity.x = 0;
@@ -109,6 +156,7 @@ class Player extends FlxSprite{
 
 	private function movement_jump(jumpPressed:Bool){
 		if (this.isTouching(FlxDirectionFlags.FLOOR)){
+			bounceVector.x = 0;
 			currentState = Idling;
 			canVariableJump = true;
 			if (jumpPressed){
@@ -123,14 +171,10 @@ class Player extends FlxSprite{
 
 		if (canVariableJump && jumpPressed){
 			if (!jumpTimer.active){
-				jumpTimer.start(timeJump, onVariableJumpEnds, 1);
+				jumpTimer.start(timeJump, (_) -> canVariableJump = false, 1);
 			}
 			velocity.y = -JUMP_SPEED;
 		}
-	}
-
-	private function onVariableJumpEnds(timer:FlxTimer){
-		canVariableJump = false;
 	}
 
 	function animate(){
